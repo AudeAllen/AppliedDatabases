@@ -11,10 +11,12 @@ db = mysql.connector.connect(
 
 def main():  
 
+    print ("In Main") 
+
     countryStr = "Enter Country:"
 
-    while True:
-        display_menu()
+    while True: 
+        display_menu()   
         Choice = input("Choice:")
 
         if (Choice == "X"):
@@ -22,9 +24,11 @@ def main():
         elif (Choice == "1"):
             Country = view_cities(countryStr)
             print (Country)
+            
 
 
 def display_menu():
+    print ("In Display Menu") 
     print("")
     print("======================================================")
     print("                           Menu                       ") 
@@ -39,14 +43,32 @@ def display_menu():
     print("X. Exit Application")
    
 ## View Cities Function
-def view_cities(n):   
+def view_cities(n):  
+
+    
+    db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="root",
+    database = "appdbproj"
+    )
+
+    print ("In view_cities") 
    
     Country = input(n) 
     print(Country)
    
     cursor = db.cursor()
 
-    cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s", (Country,))
+    cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit 2", (Country,) )
+
+    if cursor.fetchone():
+         print("Yes record found ")
+    else :
+         print("This Country does not Exist, Please Enter another:")
+         error_country()
+        
+
 
     results= cursor.fetchall() 
     print(results)
@@ -56,7 +78,30 @@ def view_cities(n):
     cursor.close()
 
 
-  
+def sql_Connector():
+
+    print ("In sql_Connector") 
+
+    db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="root",
+    database = "appdbproj"
+    )
+
+def error_country():
+
+    print ("In error country")
+
+    countryStr = "Enter Country:"
+
+     
+
+    while True: 
+        
+            Country = view_cities(countryStr)
+            print (Country)
+            break
 
 
 
