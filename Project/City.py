@@ -2,21 +2,19 @@
 ## Author: Audrey Allen
 import mysql.connector
 
-db = mysql.connector.connect(
-  host="localhost",
-  user="root",
-  password="root",
-  database = "appdbproj"
-)
+
 
 def main():  
+    sql_Connector()
 
     print ("In Main") 
 
     countryStr = "Enter Country:"
-
+    display_menu() 
     while True: 
-        display_menu()   
+        print("In main Code")
+        sql_Connector()
+           
         Choice = input("Choice:")
 
         if (Choice == "X"):
@@ -24,6 +22,7 @@ def main():
         elif (Choice == "1"):
             Country = view_cities(countryStr)
             print (Country)
+            break
             
 
 
@@ -44,43 +43,46 @@ def display_menu():
    
 ## View Cities Function
 def view_cities(n):  
-
     
-    db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="root",
-    database = "appdbproj"
-    )
-
+    sql_Connector()
     print ("In view_cities") 
    
     Country = input(n) 
     print(Country)
    
+    
     cursor = db.cursor()
-
+    
     cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit 2", (Country,) )
 
     if cursor.fetchone():
-         print("Yes record found ")
+         print("Yes record found ") 
+       # break                
     else :
-         print("This Country does not Exist, Please Enter another:")
-         error_country()
-        
-
-
+         print("This Country does not Exist, Please go back to main menu and enter another:")  
+         main()       
+         
+   
+ 
     results= cursor.fetchall() 
-    print(results)
+    print(results)   
+    main()   
 
 
     db.close()
     cursor.close()
 
 
-def sql_Connector():
 
+def sql_Connector():
+    import mysql.connector
     print ("In sql_Connector") 
+
+    global db
+    global host
+    global User
+    global password
+    global database
 
     db = mysql.connector.connect(
     host="localhost",
@@ -89,24 +91,9 @@ def sql_Connector():
     database = "appdbproj"
     )
 
-def error_country():
+    cursor = db.cursor()
 
-    print ("In error country")
-
-    countryStr = "Enter Country:"
-
-     
-
-    while True: 
-        
-            Country = view_cities(countryStr)
-            print (Country)
-            break
-
-
-
-
-
+    return db, cursor
 
 
 if __name__ == '__main__':
