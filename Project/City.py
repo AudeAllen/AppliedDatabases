@@ -2,8 +2,6 @@
 ## Author: Audrey Allen
 import mysql.connector
 
-
-
 def main():  
  
 
@@ -11,9 +9,12 @@ def main():
 
     global countryStr 
     global rownum 
+    global cityid 
 
     rownum = 0 
-    countryStr = "Enter Country:"
+    countryStr = "Enter Country:"   
+    #cityid = "Enter City ID:"
+
 
     display_menu() 
     while True: 
@@ -30,6 +31,11 @@ def main():
             rownum = 0 
             Country = view_cities(countryStr)
             print (Country)
+            break
+        elif (Choice == "2"): 
+            cityid = int(input("Enter City ID: "))                       
+            update_population(cityid)
+            print (cityid)
             break
             
 
@@ -111,16 +117,44 @@ def next_two_rows(rownum,Country):
                    
         Choice = input("Choice:")
       
+## Change the m below to not equal to q before you put live
 
         if (Choice == "q"):
             break
-        elif (Choice == "m"):
-           # print ("this is wheere you go wtong")
-            cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 3",(Country,rownum))
+        elif (Choice == "m"):           
+            cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 2",(Country,rownum))
             results= cursor.fetchall() 
             print(results) 
                    
-      
+def update_population(m): 
+
+    sql_Connector()
+    print ("In update_populations") 
+           
+    cityid = input(m) 
+   
+    cursor = db.cursor()
+       
+    #cursor.execute("select id, name, countrycode, population, longitude, latitude from city where id =%s",(cityid,))
+    #cursor.execute("select id, name, countrycode, population, longitude, latitude from city where id ='1'")
+    cursor.execute("SELECT name as 'City Name', district as 'City District', population as 'City Population' FROM  city  " )
+           
+    print ("Just after cursor execute statement")
+    
+    if cursor.fetchone():
+         print("Yes record found ")                       
+    else :
+         print("This Cityid does not Exist, Please go back to main menu and enter another:")  
+         main()       
+         
+   
+ 
+    results= cursor.fetchall() 
+    print(results)  
+    print ("Just after results")
+    
+    db.close()
+    cursor.close()
 
 def sql_Connector():
     import mysql.connector
