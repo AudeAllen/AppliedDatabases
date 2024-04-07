@@ -55,12 +55,12 @@ def view_cities(n):
     sql_Connector()
     print ("In view_cities") 
 
-    global Country   
+    global Country 
+        
     Country = input(n) 
-
+   
     print(Country)
-     
-    rownum = 0
+   
 
     cursor = db.cursor()
     
@@ -80,36 +80,47 @@ def view_cities(n):
    
  
     results= cursor.fetchall() 
-    print(results)   
+    print(results)  
+
+    next_two_rows(rownum, Country) 
     
     db.close()
     cursor.close()
     
-    #next_two_rows()
-
+    
     main()   
 
 ## End of Section    
 
-def next_two_rows():
+def next_two_rows(rownum,Country):
   
     print (rownum)
     
     rownum = rownum + 2
+  
+    cursor = db.cursor()
+
 
     print ("If you press q you will return to main menu, any other key will return next two cities of the country you entered")
 
     while True: 
         print("In next two rows")
-        
-           
+        print (rownum)
+        print (Country)
+        rownum = rownum + 2
+                   
         Choice = input("Choice:")
+      
 
         if (Choice == "q"):
             break
-        elif (Choice != "q"):
-            view_cities(Country)
-
+        elif (Choice == "m"):
+           # print ("this is wheere you go wtong")
+            cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 3",(Country,rownum))
+            results= cursor.fetchall() 
+            print(results) 
+                   
+      
 
 def sql_Connector():
     import mysql.connector
@@ -125,7 +136,8 @@ def sql_Connector():
     host="localhost",
     user="root",
     password="root",
-    database = "appdbproj"
+    database = "appdbproj",
+    consume_results=True
     )
 
     cursor = db.cursor()
