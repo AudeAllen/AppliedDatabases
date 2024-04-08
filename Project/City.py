@@ -13,14 +13,14 @@ def main():
 
     rownum = 0 
     countryStr = "Enter Country:"   
-    #cityid = "Enter City ID:"
+    cityid = "Enter City ID:"
+    
 
 
     display_menu() 
     while True: 
         print("In main Code")
-        
-           
+                   
         Choice = input("Choice:")
 
         if (Choice == "X"):
@@ -32,8 +32,7 @@ def main():
             Country = view_cities(countryStr)
             print (Country)
             break
-        elif (Choice == "2"): 
-            cityid = int(input("Enter City ID: "))                       
+        elif (Choice == "2"):                               
             update_population(cityid)
             print (cityid)
             break
@@ -57,8 +56,9 @@ def display_menu():
    
 ## View Cities Function
 def view_cities(n):  
-    
+      
     sql_Connector()
+    
     print ("In view_cities") 
 
     global Country 
@@ -70,8 +70,7 @@ def view_cities(n):
 
     cursor = db.cursor()
     
-    #cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit 4, 3",(Country,))
-    
+       
     cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 3",(Country,rownum))
     
      
@@ -121,40 +120,39 @@ def next_two_rows(rownum,Country):
 
         if (Choice == "q"):
             break
-        elif (Choice == "m"):           
+        elif (Choice != "m"):           
             cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 2",(Country,rownum))
             results= cursor.fetchall() 
             print(results) 
                    
 def update_population(m): 
-
-    sql_Connector()
-    print ("In update_populations") 
-           
+    
+    import mysql.connector
+    
+    global cityid 
+        
     cityid = input(m) 
-   
+
+    db = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="root",
+        database = "appdbproj"
+    )
+
     cursor = db.cursor()
-       
-    #cursor.execute("select id, name, countrycode, population, longitude, latitude from city where id =%s",(cityid,))
-    #cursor.execute("select id, name, countrycode, population, longitude, latitude from city where id ='1'")
-    cursor.execute("SELECT name as 'City Name', district as 'City District', population as 'City Population' FROM  city  " )
-           
-    print ("Just after cursor execute statement")
-    
-    if cursor.fetchone():
-         print("Yes record found ")                       
-    else :
-         print("This Cityid does not Exist, Please go back to main menu and enter another:")  
-         main()       
-         
-   
- 
+
+    cursor.execute("select ID, name, countrycode, population, longitude, latitude from citycopy where id =%s",(cityid,))
     results= cursor.fetchall() 
-    print(results)  
-    print ("Just after results")
+    print(results)
+
     
+              
+      
     db.close()
     cursor.close()
+
+
 
 def sql_Connector():
     import mysql.connector

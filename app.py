@@ -9,7 +9,7 @@ db = mysql.connector.connect(
 
 cursor = db.cursor()
 
-cursor.execute("select * from city")
+cursor.execute("select * from city where id = 245")
 results= cursor.fetchall() 
 print(results)
 
