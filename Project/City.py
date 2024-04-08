@@ -2,6 +2,8 @@
 ## Author: Audrey Allen
 import mysql.connector
 
+global IncreaseorDecrease
+
 def main():  
  
 
@@ -12,7 +14,7 @@ def main():
     global cityid 
 
     rownum = 0 
-    countryStr = "Enter Country:"   
+    countryStr = "Enter Country:"     
     cityid = "Enter City ID:"
     
 
@@ -75,7 +77,7 @@ def view_cities(n):
     
      
 
-    if cursor.fetchone():
+    if cursor.fetchall():
          print("Yes record found ") 
        # break                
     else :
@@ -120,7 +122,7 @@ def next_two_rows(rownum,Country):
 
         if (Choice == "q"):
             break
-        elif (Choice != "m"):           
+        elif (Choice != "q"):           
             cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 2",(Country,rownum))
             results= cursor.fetchall() 
             print(results) 
@@ -130,7 +132,7 @@ def update_population(m):
     import mysql.connector
     
     global cityid 
-        
+            
     cityid = input(m) 
 
     db = mysql.connector.connect(
@@ -143,16 +145,51 @@ def update_population(m):
     cursor = db.cursor()
 
     cursor.execute("select ID, name, countrycode, population, longitude, latitude from citycopy where id =%s",(cityid,))
+    
+
+
+    if cursor.fetchall():
+         print("Yes record found ")                        
+    else :
+         print("This City does not Exist, Please go back to main menu and enter another:")  
+         update_population(m)
+
     results= cursor.fetchall() 
-    print(results)
+    print(results)     
+
+   
+    try:
+        #IncreaseorDecrease, Amount = input("Enter I if you want to increase population, D for decrease and also enter amount: ").split()
+        IncreaseorDecrease = input("Enter I if you want to increase population, D for decrease : ")
+        Amount = input("Enter Amount Please : ")        
+        print("Increase or Decrease: ", IncreaseorDecrease)
+        print("Amount: ", Amount)
+    except UnboundLocalError: 
+        print("Please enter two parameters I or D and amount:")    
+    except ValueError: 
+        print("Please enter two parameters I or D and amount:")        
 
     
-              
+    display_menu() 
+    while True:            
+        
+
+        if (IncreaseorDecrease == "I"):
+            IncreasePop = increase_population(cityid,Amount)
+            break
+                  
       
     db.close()
     cursor.close()
 
+def increase_population(cityid,Amount):
+    
+    sql_Connector()
 
+    print (" In Increase pop") 
+    print (cityid)
+    print (Amount)
+        
 
 def sql_Connector():
     import mysql.connector
