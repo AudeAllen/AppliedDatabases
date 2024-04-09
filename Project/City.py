@@ -146,50 +146,73 @@ def update_population(m):
 
     cursor.execute("select ID, name, countrycode, population, longitude, latitude from citycopy where id =%s",(cityid,))
     
+    results= cursor.fetchall() 
+    print(results)  
 
+    NumRows = cursor.rowcount   
+    print (NumRows)   
+  
 
-    if cursor.fetchall():
-         print("Yes record found ")                        
+    if cursor.rowcount > 0: 
+         print ("Record Found")                                
     else :
          print("This City does not Exist, Please go back to main menu and enter another:")  
          update_population(m)
-
-    results= cursor.fetchall() 
-    print(results)     
-
-   
-    try:
-        #IncreaseorDecrease, Amount = input("Enter I if you want to increase population, D for decrease and also enter amount: ").split()
-        IncreaseorDecrease = input("Enter I if you want to increase population, D for decrease : ")
-        Amount = input("Enter Amount Please : ")        
-        print("Increase or Decrease: ", IncreaseorDecrease)
-        print("Amount: ", Amount)
-    except UnboundLocalError: 
-        print("Please enter two parameters I or D and amount:")    
-    except ValueError: 
-        print("Please enter two parameters I or D and amount:")        
-
     
-    display_menu() 
-    while True:            
+    while True:
+        IncreaseorDecrease = input("Enter I if you want to increase population, D for decrease : ")
+        if IncreaseorDecrease not in ('I', 'D'):
+                print("Not an appropriate choice. Please choose again")
+        else:
+                break  
         
-
-        if (IncreaseorDecrease == "I"):
-            IncreasePop = increase_population(cityid,Amount)
-            break
-                  
-      
+    while True:
+        Amount = int(input(" Please enter Amount:"))
+        if not isinstance(Amount, int):
+                print("Must be an integer value")
+        elif (IncreaseorDecrease == "I"):
+            IncreasePop = increase_population(cityid,Amount) 
+            break   
+        else: 
+            break    
+                   
+         
     db.close()
     cursor.close()
 
 def increase_population(cityid,Amount):
-    
-    sql_Connector()
 
-    print (" In Increase pop") 
+    print ("In increase population")
+
+    import mysql.connector
+      
+    db = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="root",
+        database = "appdbproj",
+        autocommit=True
+    )
+
+    cursor = db.cursor()
+
     print (cityid)
-    print (Amount)
-        
+    print(Amount)
+
+    #cursor.execute("select ID, name, countrycode, population, longitude, latitude from citycopy where id =%s",(cityid,))
+    cursor.execute("UPDATE citycopy SET population = population + %s where id =%s",(Amount,cityid,))
+    
+
+    Rownumber =cursor.rowcount 
+    print(Rownumber)
+    results= cursor.fetchall() 
+    print(results)  
+
+    print('Just about to close out')
+    db.close()
+    cursor.close()
+
+    
 
 def sql_Connector():
     import mysql.connector
@@ -206,7 +229,8 @@ def sql_Connector():
     user="root",
     password="root",
     database = "appdbproj",
-    consume_results=True
+    consume_results=True,
+    autocommit=True
     )
 
     cursor = db.cursor()
