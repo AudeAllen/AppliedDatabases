@@ -173,6 +173,9 @@ def update_population(m):
         elif (IncreaseorDecrease == "I"):
             IncreasePop = increase_population(cityid,Amount) 
             break   
+        elif (IncreaseorDecrease == "D"):
+            IncreasePop = decrease_population(cityid,Amount) 
+            break          
         else: 
             break    
                    
@@ -212,7 +215,38 @@ def increase_population(cityid,Amount):
     db.close()
     cursor.close()
 
+def decrease_population(cityid,Amount):
+
+    print ("In decrease population")
+
+    import mysql.connector
+      
+    db = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="root",
+        database = "appdbproj",
+        autocommit=True
+    )
+
+    cursor = db.cursor()
+
+    print (cityid)
+    print(Amount)
+
+    #cursor.execute("select ID, name, countrycode, population, longitude, latitude from citycopy where id =%s",(cityid,))
+    cursor.execute("UPDATE citycopy SET population = population - %s where id =%s",(Amount,cityid,))
     
+
+    Rownumber =cursor.rowcount 
+    print(Rownumber)
+    results= cursor.fetchall() 
+    print(results)  
+
+    print('Just about to close out')
+    db.close()
+    cursor.close()
+   
 
 def sql_Connector():
     import mysql.connector
