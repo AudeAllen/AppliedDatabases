@@ -38,6 +38,9 @@ def main():
             update_population(cityid)
             print (cityid)
             break
+        elif (Choice == "3"):                               
+            add_newperson()            
+            break
             
 
 
@@ -72,30 +75,25 @@ def view_cities(n):
 
     cursor = db.cursor()
     
-       
-    cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 3",(Country,rownum))
-    
-     
-
-    if cursor.fetchall():
-         print("Yes record found ") 
-       # break                
-    else :
-         print("This Country does not Exist, Please go back to main menu and enter another:")  
-         main()       
-         
    
- 
-    results= cursor.fetchall() 
-    print(results)  
-
-    next_two_rows(rownum, Country) 
+    cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 3",(Country ,rownum))
     
+    results= cursor.fetchall() 
+    print(results) 
+
+    if cursor.rowcount > 0: 
+         print ("Record Found")  
+         next_two_rows(rownum, Country)                              
+    else :
+         print("This Country does not Exist, Please enter another:")  
+         view_cities(n)
+     
+    main()   
+       
     db.close()
     cursor.close()
     
-    
-    main()   
+         
 
 ## End of Section    
 
@@ -215,6 +213,8 @@ def increase_population(cityid,Amount):
     db.close()
     cursor.close()
 
+    main()
+
 def decrease_population(cityid,Amount):
 
     print ("In decrease population")
@@ -247,6 +247,48 @@ def decrease_population(cityid,Amount):
     db.close()
     cursor.close()
    
+    main()
+
+def add_newperson():  
+    
+    while True:
+         try:
+              userid = int(input("Please Enter a UserID: ")) 
+              break              
+         except ValueError:
+              print("Invalid input. Please enter a valid integer.")
+
+    while True:
+         try:
+              firstlastname = input("Please Enter your First and Last Name: ") 
+              int(firstlastname)               
+              print("Invalid input. Please enter a string value.")                                         
+         except ValueError:
+              break
+         
+    while True:
+         try:
+              Age = int(input("Please Enter the Persons Age: ")) 
+              break              
+         except ValueError:
+              print("Invalid input. Please enter a valid integer.")
+     
+    while True:
+         try:
+              salary = int(input("Please Enter the Persons Salary: ")) 
+              break              
+         except ValueError:
+              print("Invalid input. Please enter a valid integer.")     
+
+    while True:
+         try:
+              personcityid = int(input("Please Enter the CityID: ")) 
+              break              
+         except ValueError:
+              print("Invalid input. Please enter a valid integer.")                           
+
+    print(f"You have chosen the following to add to the database, userid = {userid}  Fullname = {firstlastname}  Age ={Age} Salary = {salary} CityID = {personcityid}!")
+    
 
 def sql_Connector():
     import mysql.connector
