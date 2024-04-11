@@ -165,8 +165,8 @@ def update_population(m):
                 break  
         
     while True:
-        Amount = int(input(" Please enter Amount:"))
-        if not isinstance(Amount, int):
+        Amount = float(input(" Please enter Amount:"))
+        if not isinstance(Amount, float):
                 print("Must be an integer value")
         elif (IncreaseorDecrease == "I"):
             IncreasePop = increase_population(cityid,Amount) 
@@ -283,7 +283,7 @@ def add_newperson():
      
     while True:
          try:
-              salary = int(input("Please Enter the Persons Salary: ")) 
+              salary = float(input("Please Enter the Persons Salary: ")) 
               break              
          except ValueError:
               print("Invalid input. Please enter a valid integer.")     
@@ -299,7 +299,7 @@ def add_newperson():
 
     cursor = db.cursor()
 
-    cursor.execute("select PersonID from person where id =%s",(userid,))
+    cursor.execute("select PersonID from person where PersonID =%s",(userid,))
             
     results= cursor.fetchall() 
     print(results)  
@@ -326,10 +326,21 @@ def add_newperson():
         
 
     if cursor.rowcount > 0: 
-            print (f"This city id {personcityid} already exists")
-            main()                                          
+            print (f"This city id {personcityid}  exists")                                                     
     else :
-        print("City ID does not exist, Good job!!")        
+        print (f"This city id {personcityid} does not exist you will be returned to Main Menu")
+        main() 
+              
+
+
+    cursor = db.cursor()
+
+    cursor.execute("Insert into person (personid, personname, age, salary, city)VALUES (%s,%s, %s, %s,%s)",(userid,firstlastname,Age,salary,personcityid,))
+
+    Rownumber =cursor.rowcount 
+    print(Rownumber)
+    results= cursor.fetchall() 
+    print(results) 
 
 
     db.close()
