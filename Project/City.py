@@ -18,7 +18,6 @@ def main():
     cityid = "Enter City ID:"
     
 
-
     display_menu() 
     while True: 
         print("In main Code")
@@ -41,6 +40,10 @@ def main():
         elif (Choice == "3"):                               
             add_newperson()            
             break
+        elif (Choice == "4"):                               
+            delete_person()            
+            break
+      
             
 
 
@@ -346,6 +349,60 @@ def add_newperson():
     db.close()
     cursor.close()
 
+def delete_person():
+     
+     import mysql.connector
+     sql_Connector()
+
+    
+    
+     while True:
+         try:
+              userid = int(input("Please Enter the UserID of the person you wish to delete: ")) 
+              break              
+         except ValueError:
+              print("Invalid input. Please enter a valid integer.")
+
+    
+     print(f"You have chosen to delete the following person from the database, userid = {userid}!")
+
+     cursor = db.cursor()
+
+     cursor.execute("select * from person where personid =%s",(userid,))
+                
+     results= cursor.fetchall() 
+     print(results)  
+
+  
+     if cursor.rowcount > 0: 
+            print (f"This user id {userid} exists")                                                              
+     else :
+        print("User ID does not exist so cannot perform delete operation!!") 
+        main()
+                  
+
+     cursor.execute("select * from person person inner join hasvisitedcity hasvisitedcity on person.personid = hasvisitedcity.personid where  hasvisitedcity.personid =%s",(userid,))
+     
+     results= cursor.fetchall() 
+     print(results)
+
+     if cursor.rowcount > 0: 
+            print (f"This user id {userid} exists but has visited a city so cannot be deleted")
+            main()                                                  
+     else :
+        print("User ID can be deleted!!") 
+        
+        cursor = db.cursor()
+
+        cursor.execute("delete from person where personid =%s",(userid,))
+                
+        results= cursor.fetchall() 
+        print(results)  
+
+        main()
+
+     db.close()
+     cursor.close() 
 
 
 def sql_Connector():
