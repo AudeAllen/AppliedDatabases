@@ -200,7 +200,7 @@ def increase_population(cityid,Amount):
     print (cityid)
     print(Amount)
 
-    #cursor.execute("select ID, name, countrycode, population, longitude, latitude from citycopy where id =%s",(cityid,))
+    
     cursor.execute("UPDATE citycopy SET population = population + %s where id =%s",(Amount,cityid,))
     
 
@@ -234,7 +234,7 @@ def decrease_population(cityid,Amount):
     print (cityid)
     print(Amount)
 
-    #cursor.execute("select ID, name, countrycode, population, longitude, latitude from citycopy where id =%s",(cityid,))
+    
     cursor.execute("UPDATE citycopy SET population = population - %s where id =%s",(Amount,cityid,))
     
 
@@ -250,6 +250,14 @@ def decrease_population(cityid,Amount):
     main()
 
 def add_newperson():  
+    import mysql.connector
+    sql_Connector()
+
+    global userid
+    global firstlastname
+    global Age
+    global salary
+    global personcityid
     
     while True:
          try:
@@ -288,7 +296,46 @@ def add_newperson():
               print("Invalid input. Please enter a valid integer.")                           
 
     print(f"You have chosen the following to add to the database, userid = {userid}  Fullname = {firstlastname}  Age ={Age} Salary = {salary} CityID = {personcityid}!")
-    
+
+    cursor = db.cursor()
+
+    cursor.execute("select PersonID from person where id =%s",(userid,))
+            
+    results= cursor.fetchall() 
+    print(results)  
+
+    NumRows = cursor.rowcount   
+    print (NumRows)   
+        
+
+    if cursor.rowcount > 0: 
+            print (f"This user id {userid} already exists you will be returned to Main Menu")
+            main()                                       
+    else :
+        print("User ID does not exist, Good job!!")  
+
+    cursor = db.cursor()
+
+    cursor.execute("select ID from citycopy where id =%s",(personcityid,))
+            
+    results= cursor.fetchall() 
+    print(results)  
+
+    NumRows = cursor.rowcount   
+    print (NumRows)   
+        
+
+    if cursor.rowcount > 0: 
+            print (f"This city id {personcityid} already exists")
+            main()                                          
+    else :
+        print("City ID does not exist, Good job!!")        
+
+
+    db.close()
+    cursor.close()
+
+
 
 def sql_Connector():
     import mysql.connector
