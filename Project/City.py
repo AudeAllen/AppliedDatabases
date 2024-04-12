@@ -43,6 +43,9 @@ def main():
         elif (Choice == "4"):                               
             delete_person()            
             break
+        elif (Choice == "5"):                               
+            show_population()            
+            break
       
             
 
@@ -385,7 +388,6 @@ def delete_person():
      
      results= cursor.fetchall() 
      print(results)
-
      if cursor.rowcount > 0: 
             print (f"This user id {userid} exists but has visited a city so cannot be deleted")
             main()                                                  
@@ -403,6 +405,52 @@ def delete_person():
 
      db.close()
      cursor.close() 
+
+def show_population():
+     
+    import mysql.connector
+    sql_Connector()
+
+    while True:
+        populationsymbol = input("Please Enter > OR < or = and you will shown Countries Population in regards to the symbol chosen: ")
+        if populationsymbol not in ('>', '<', '='):
+                print("Not an appropriate choice. Please choose again")
+        else:
+                break  
+
+    while True:
+         try:
+              populationamount = int(input("Please Enter a Population Amount: ")) 
+              break              
+         except ValueError:
+              print("Invalid input. Please enter a valid integer.")             
+
+    cursor = db.cursor()
+  
+
+
+    if populationsymbol == '>':
+        print ("going to execute sql statement")
+        cursor.execute("select code,name, continent, population from country where population > %s",(populationamount,))
+        results= cursor.fetchall() 
+        print(results)    
+    elif   populationsymbol == '<':  
+         cursor.execute("select  code,name, continent, population from country where population < %s",(populationamount,))
+         results= cursor.fetchall() 
+         print(results)
+    elif  populationsymbol == '=':   
+         cursor.execute("select  code,name, continent, population from country where population = %s",(populationamount,))
+         results= cursor.fetchall() 
+         print(results)
+    else:
+         print("Invalid Option Chosen:")
+       
+    
+    if cursor.rowcount > 0: 
+            print (f"The countries with a population {populationsymbol} {populationamount} are ")                                                              
+    else :
+        print("There are no countries with a population {populationsymbol} {populationamount} !!") 
+       
 
 
 def sql_Connector():
