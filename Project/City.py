@@ -46,6 +46,9 @@ def main():
         elif (Choice == "5"):                               
             show_population()            
             break
+        elif (Choice == "6"):                               
+            show_twinned_cities()            
+            break
       
             
 
@@ -451,6 +454,37 @@ def show_population():
     else :
         print("There are no countries with a population {populationsymbol} {populationamount} !!") 
        
+def show_twinned_cities():
+    
+    from neo4j import GraphDatabase
+    # Replace with the actual URI, username and password
+    AURA_CONNECTION_URI = "neo4j://localhost:7687"
+    AURA_USERNAME = "neo4j"
+    AURA_PASSWORD = "Brokercrm123!"
+
+        # Driver instantiation
+    neo4jDriver = GraphDatabase.driver(
+    AURA_CONNECTION_URI,
+    auth=(AURA_USERNAME, AURA_PASSWORD)
+    )
+
+    with neo4jDriver.session() as session:
+         cities = session.read_transaction(get_twinned_cities)
+         for city in cities:
+              print(city)
+
+
+    def get_twinned_cities(tx):
+         query = "MATCH(n:City)-[r:TWINNED_WITH]->(C:City) return n.name,type(r), C.name" 
+         results = tx.run(query) 
+         cities = [] 
+         for result in results: 
+            cities.append(result['n.name,type(r), C.name']) 
+         return cities          
+
+   # Close the driver connection
+    neo4jDriver.close()
+
 
 
 def sql_Connector():
