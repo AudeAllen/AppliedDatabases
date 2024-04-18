@@ -456,35 +456,33 @@ def show_population():
        
 def show_twinned_cities():
     
-    from neo4j import GraphDatabase
-    # Replace with the actual URI, username and password
-    AURA_CONNECTION_URI = "neo4j://localhost:7687"
-    AURA_USERNAME = "neo4j"
-    AURA_PASSWORD = "Brokercrm123!"
+    neo4jconnection()
 
-        # Driver instantiation
-    neo4jDriver = GraphDatabase.driver(
-    AURA_CONNECTION_URI,
-    auth=(AURA_USERNAME, AURA_PASSWORD)
-    )
-
-    with neo4jDriver.session() as session:
-         cities = session.read_transaction(get_twinned_cities)
-         for city in cities:
-              print(city)
+    with driver.session() as session:
+        values = session.read_transaction(display_twinned_cities)
 
 
-    def get_twinned_cities(tx):
-         query = "MATCH(n:City)-[r:TWINNED_WITH]->(C:City) return n.name,type(r), C.name" 
-         results = tx.run(query) 
-         cities = [] 
-         for result in results: 
-            cities.append(result['n.name,type(r), C.name']) 
-         return cities          
+def display_twinned_cities(tx):
 
-   # Close the driver connection
-    neo4jDriver.close()
+    query = "MATCH(n:City)-[r:TWINNED_WITH]->(C:City) return n.name, r.type, C.name order by n.name"    
+    results = tx.run(query)   
+    print ("Twinned Cities")
+    print ("===============")  
+    for result in results:                       
+        print  (result['n.name'] + "<------------>" + result['C.name'])
 
+          
+
+def neo4jconnection():
+       
+ from neo4j import GraphDatabase
+
+ drivr = None
+
+ global driver
+     
+ uri ="neo4j://localhost:7687"
+ driver = GraphDatabase.driver(uri, auth=("neo4j", "Brokercrm123!"), max_connection_lifetime=1000) 
 
 
 def sql_Connector():
