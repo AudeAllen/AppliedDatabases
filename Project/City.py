@@ -49,6 +49,10 @@ def main():
         elif (Choice == "6"):                               
             show_twinned_cities()            
             break
+        elif (Choice == "7"):                               
+            twin_with_dublin()            
+            break
+      
       
             
 
@@ -358,9 +362,7 @@ def add_newperson():
 def delete_person():
      
      import mysql.connector
-     sql_Connector()
-
-    
+     sql_Connector()    
     
      while True:
          try:
@@ -471,11 +473,83 @@ def display_twinned_cities(tx):
     for result in results:                       
         print  (result['n.name'] + "<------------>" + result['C.name'])
 
-          
+def twin_with_dublin():
+
+    sql_Connector()
+
+    global cityname
+    global neo4jcityid
+     
+    while True:
+         try:
+              neo4jcityid = int(input("Please Enter a CityID that you would like to twin with Dublin: ")) 
+              break              
+         except ValueError:
+              print("Invalid input. Please enter a valid integer.") 
+
+    cursor = db.cursor()
+    
+    cursor.execute("select ID, name from citycopy where id =%s",(neo4jcityid,))
+  
+
+           
+    results= cursor.fetchall() 
+    print(results) 
+
+    # print the results in each row
+    for r in results:        
+        print(r[0])
+        print(r[1])
+        cityname = (r[1])
+        print(cityname)
+        
+
+
+
+    NumRows = cursor.rowcount   
+    print (NumRows)  
+
+        
+
+    if cursor.rowcount > 0: 
+            print (f"This city id {neo4jcityid}  exists")                                                     
+    else :
+        print (f"This city id {neo4jcityid} does not exist please enter another ID")
+        twin_with_dublin()  
+
+
+    neo4jconnection()
+    from neo4j import exceptions
+
+
+    with driver.session() as session:
+        try:    
+            session.write_transaction(create_twin_with_dublin, cityname, neo4jcityid)
+            main()    
+        except exceptions.ClientError as e:               
+               print ("Error Parameters are not valid")
+             
+def create_twin_with_dublin(tx,cityname,neo4jcityid):
+   
+   print ("in the create bit")
+   print(cityname)
+   print(neo4jcityid)
+     
+   tx.run("MATCH(u:City {name:'Dublin'}) "
+           "CREATE(p:City {name:$cityname, cid:$neo4jcityid})"        
+           "CREATE(p)-[w:TWINNED_WITH]->(u)",
+            cityname=cityname, neo4jcityid=neo4jcityid)
+            
+
+
+   print (f"Dublin is now twinned with {cityname}")   
+
+#driver.close()           
 
 def neo4jconnection():
        
  from neo4j import GraphDatabase
+ from neo4j import exceptions
 
  drivr = None
 
