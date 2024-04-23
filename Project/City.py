@@ -25,9 +25,9 @@ def main():
         Choice = input("Choice:")
 
         if (Choice == "X"):
-            break
+            exit()
         elif (Choice == "x"):
-            break
+            exit()
         elif (Choice == "1"):
             rownum = 0 
             Country = view_cities(countryStr)
@@ -463,6 +463,8 @@ def show_twinned_cities():
     with driver.session() as session:
         values = session.read_transaction(display_twinned_cities)
 
+    driver.close()    
+
 
 def display_twinned_cities(tx):
 
@@ -476,6 +478,8 @@ def display_twinned_cities(tx):
 def twin_with_dublin():
 
     sql_Connector()
+    neo4jconnection()
+    from neo4j import exceptions
 
     global cityname
     global neo4jcityid
@@ -490,9 +494,7 @@ def twin_with_dublin():
     cursor = db.cursor()
     
     cursor.execute("select ID, name from citycopy where id =%s",(neo4jcityid,))
-  
-
-           
+             
     results= cursor.fetchall() 
     print(results) 
 
@@ -503,44 +505,30 @@ def twin_with_dublin():
         cityname = (r[1])
         print(cityname)
         
-
-
-
     NumRows = cursor.rowcount   
     print (NumRows)  
 
-        
 
     if cursor.rowcount > 0: 
             print (f"This city id {neo4jcityid}  exists")                                                     
     else :
         print (f"This city id {neo4jcityid} does not exist please enter another ID")
         twin_with_dublin()  
-
-
-    neo4jconnection()
-    from neo4j import exceptions
-
-    print(cityname)
-
-
+   
+    
 
     with driver.session() as session:
-        try:    
-           values = session.read_transaction(display_does_city_exist,cityname)
-        except exceptions.ClientError as e:
-             print ("In error section - Something has gone wrong") 
+                values = session.read_transaction(display_does_city_exist,cityname)  
 
-   
-        driver.close()
+     
+    driver.close() 
+     
 
 
 def display_does_city_exist(tx,cityname):
-
-        neo4jconnection()
-        from neo4j import exceptions
         
-
+        print("In display_does_city_exist read section")
+       
         results =  tx.run("MATCH (u:City {name: $cityname}) "
            "WITH COUNT(u) > 0  as node_exists "        
            "RETURN node_exists",
@@ -548,7 +536,7 @@ def display_does_city_exist(tx,cityname):
         for result in results:                       
          print  (result['node_exists']) 
  
-
+        print("error message")     
 
         while True:
             if (result['node_exists']) == True:
@@ -576,19 +564,19 @@ def display_does_city_exist(tx,cityname):
                        
 
 def create_twin_with_dublin(tx,cityname,neo4jcityid):
+
+    neo4jconnection()
+    from neo4j import exceptions
    
-   print ("in the create bit")
-   print(cityname)
-   print(neo4jcityid)
-     
-   tx.run("MATCH(u:City {name:'Dublin'}) "
-           "CREATE(p:City {name:$cityname, cid:$neo4jcityid})"        
-           "CREATE(p)-[w:TWINNED_WITH]->(u)",
-            cityname=cityname, neo4jcityid=neo4jcityid)
+    
+    tx.run("MATCH(u:City {name:'Dublin'}) "
+                "CREATE(p:City {name:$cityname, cid:$neo4jcityid})"        
+                "CREATE(p)-[w:TWINNED_WITH]->(u)",
+                    cityname=cityname, neo4jcityid=neo4jcityid)
             
 
 
-   print (f"Dublin is now twinned with {cityname}")   
+    print (f"Dublin is now twinned with {cityname}")   
 
 #def create_twinonly_with_dublin (tx,cityname,neo4jcityid):     
 
@@ -601,7 +589,7 @@ def neo4jconnection():
 
  global driver
      
- uri ="neo4j://localhost:7687"
+ uri ="neo4j://localhost:7687" 
  driver = GraphDatabase.driver(uri, auth=("neo4j", "Brokercrm123!"), max_connection_lifetime=1000) 
 
 
