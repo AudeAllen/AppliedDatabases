@@ -521,14 +521,60 @@ def twin_with_dublin():
     neo4jconnection()
     from neo4j import exceptions
 
+    print(cityname)
+
+
 
     with driver.session() as session:
         try:    
-            session.write_transaction(create_twin_with_dublin, cityname, neo4jcityid)
-            main()    
-        except exceptions.ClientError as e:               
-               print ("Error Parameters are not valid")
-             
+           values = session.read_transaction(display_does_city_exist,cityname)
+        except exceptions.ClientError as e:
+             print ("In error section - Something has gone wrong") 
+
+   
+        driver.close()
+
+
+def display_does_city_exist(tx,cityname):
+
+        neo4jconnection()
+        from neo4j import exceptions
+        
+
+        results =  tx.run("MATCH (u:City {name: $cityname}) "
+           "WITH COUNT(u) > 0  as node_exists "        
+           "RETURN node_exists",
+            cityname=cityname)
+        for result in results:                       
+         print  (result['node_exists']) 
+ 
+
+
+        while True:
+            if (result['node_exists']) == True:
+                print("This city already exists so will be just twinned not created")
+                with driver.session() as session:
+                    try:    
+                       # session.write_transaction(create_twinonly_with_dublin, cityname, neo4jcityid)
+                        main()    
+                    except exceptions.ClientError as e:               
+                        print ("Error Parameters are not valid")                
+            elif (result['node_exists']) == False:
+                print("City does not exist - YAY!!") 
+                with driver.session() as session:
+                    try:    
+                        session.write_transaction(create_twin_with_dublin, cityname, neo4jcityid)
+                        main()    
+                    except exceptions.ClientError as e:               
+                        print ("Error Parameters are not valid")
+            else:          
+                break
+
+    
+            driver.close()        
+
+                       
+
 def create_twin_with_dublin(tx,cityname,neo4jcityid):
    
    print ("in the create bit")
@@ -544,7 +590,7 @@ def create_twin_with_dublin(tx,cityname,neo4jcityid):
 
    print (f"Dublin is now twinned with {cityname}")   
 
-#driver.close()           
+#def create_twinonly_with_dublin (tx,cityname,neo4jcityid):     
 
 def neo4jconnection():
        
