@@ -604,15 +604,13 @@ def create_twinonly_with_dublin(tx,cityname,neo4jcityid):
                             main()
         elif (result['isTwinned']) == False:
                 print ("In bit I want ")
-                results = tx.run("MATCH(u:City {name:'Dublin'})"
-                        "MATCH(c:City {name:$cityname, cid:$neo4jcityid}) "                   
-                        "CREATE(u)-[w:TWINNED_WITH]->(c)",
-                        cityname=cityname, neo4jcityid=neo4jcityid) 
-                main()
-                print (f"Dublin is now twinned with {cityname}") 
-                for result in results: 
-                        print("Just in results")                          
-                        print  (result['w'])                         
+                with driver.session() as session:
+                    try:    
+                        session.write_transaction(test, cityname, neo4jcityid)
+                        main()    
+                    except exceptions.ClientError as e:               
+                        print ("Error Parameters are not valid")
+                         
                                         
         else:
             print("Going back to Main Menu")
@@ -620,7 +618,23 @@ def create_twinonly_with_dublin(tx,cityname,neo4jcityid):
 
             print("Just leaving the section2")
     
+def test(tx,cityname, neo4jcityid):
+       from neo4j import exceptions
 
+       print ("in test") 
+
+       results = tx.run("MATCH(u:City {name:'Dublin'})"
+                        "MATCH(c:City {name:$cityname, cid:$neo4jcityid}) "                   
+                        "CREATE(u)-[w:TWINNED_WITH]->(c)",
+                        cityname=cityname, neo4jcityid=neo4jcityid) 
+       
+       print (f"Dublin is now twinned with {cityname}") 
+       for result in results: 
+                        print("Just in results")                          
+                        print  (result['w'])    
+
+                                
+     
 def neo4jconnection():
        
  from neo4j import GraphDatabase
