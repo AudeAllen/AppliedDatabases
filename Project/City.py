@@ -546,7 +546,7 @@ def display_does_city_exist(tx,cityname):
                         session.write_transaction(create_twinonly_with_dublin, cityname, neo4jcityid)
                         main()    
                     except exceptions.ClientError as e:               
-                        print ("Error Parameters are not valid")                
+                        print (e)               
             elif (result['node_exists']) == False:
                 print("City does not exist - YAY!!") 
                 with driver.session() as session:
@@ -577,33 +577,42 @@ def create_cityandtwin_with_dublin(tx,cityname,neo4jcityid):
     print (f"{cityname} is now created and is twinned with Dublin")          
            
 
-def create_twinonly_with_dublin (tx,cityname,neo4jcityid):    
+def create_twinonly_with_dublin (tx,cityname,neo4jcityid):  
+
+        from neo4j import exceptions
+        print("In create_twinonly_with_dublin")
+        print(cityname)
+
+    
+        #results =  tx.run("MATCH (c:City{name:'Dublin'})<-[r]->(n:City{name: $cityname}) "                  
+        #    "RETURN type(r) as reltype",
+        #        cityname=cityname)        
+        #for result in results:                           
+        #     print  (result['reltype']) 
+
+        results =  tx.run("OPTIONAL MATCH (c:City{name:'Dublin'})<-[r]->(n:City{name: $cityname}) "                  
+            "RETURN c, r IS NOT NULL as isTwinned",
+                cityname=cityname)        
+        for result in results:                           
+             print  (result['isTwinned']) 
    
-    from neo4j import exceptions
+        print("Just leaving the section")
+           
+        while True:
+            if (result['isTwinned']) == "True":
+                            print("This city already twinned with Dublin so you will return to Main Menu")
+                            main()
+            elif tx.run("MATCH(u:City {name:'Dublin'}) "
+                                    "MATCH(c:City {name:$cityname})"                   
+                                    "CREATE(u)-[w:TWINNED_WITH]->(c)",
+                                cityname=cityname, neo4jcityid=neo4jcityid): 
+                        print (f"Dublin is now twinned with {cityname}") 
+                        main()
+            else:
+                 break            
 
-    print("In create_twinonly_with_dublin")
-
-    print(cityname)
-
-    results =  tx.run("MATCH (c:City{name:'Dublin'})-[r]->(n:City{name: $cityname}) "                  
-           "RETURN type(r) as type",
-            cityname=cityname)
-    for result in results:                       
-         print  (result['type']) 
-
-
-         while True:
-            if (result['type']) == "TWINNED_WITH":
-                print("This city already twinned with Dublin")
-                break
-            else:  
-                 tx.run("MATCH(u:City {name:'Dublin'}) "
-                        "MATCH(c:City {name:$cityname,$neo4jcityid})"                   
-                        "CREATE(u)-[w:TWINNED_WITH]->(c)",
-                    cityname=cityname, neo4jcityid=neo4jcityid) 
-                 print (f"Dublin is now twinned with {cityname}") 
+            print("Just leaving the section2")
   
-        
 
 
 def neo4jconnection():
