@@ -50,7 +50,6 @@ def main():
             twin_with_dublin()            
             break
       
-      
             
 
 
@@ -77,21 +76,34 @@ def view_cities(n):
     global Country 
         
     Country = input(n) 
+
+    print (Country)
    
 
     cursor = db.cursor()
     
    
-    cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 3",(Country ,rownum))
-    
+    #cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 3",(Country ,rownum))
+    cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME like %s order by ci.name limit %s, 3",("%{}%".format(Country),rownum))
+  
     results= cursor.fetchall() 
-    print(results) 
+    print(results)  
 
-    if cursor.rowcount > 0: 
-         print ("Record Found")  
-         next_two_rows(rownum, Country)                              
+   # def get_first_element_using_map(tuples_list):
+   #     first_elements = list(map(lambda x: x[0], tuples_list))
+   #     return first_elements[0]   
+
+   # print(f"The first elements of the list are: {get_first_element_using_map(results)}")           
+
+    if cursor.rowcount > 0:  
+        def get_first_element_using_map(tuples_list):
+            first_elements = list(map(lambda x: x[0], tuples_list))                           
+            return first_elements[0]                                    
+        print(f"The first elements of the list are: {get_first_element_using_map(results)}")           
+        print ("Record Found")  
+        next_two_rows(rownum, Country)                              
     else :
-         print("This Country does not Exist, Please enter another:")  
+         print("Your country search has returned more than one country or your country does not exist please choose again but be more specific!!!:")  
          view_cities(n)
      
     main()   
@@ -125,7 +137,8 @@ def next_two_rows(rownum,Country):
         if (Choice == "q"):
             break
         elif (Choice != "q"):           
-            cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 2",(Country,rownum))
+           # cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 2",(Country,rownum))
+            cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME like %s order by ci.name limit %s, 2",("%{}%".format(Country),rownum))
             results= cursor.fetchall() 
             print(results) 
                    
@@ -154,7 +167,6 @@ def update_population(m):
     NumRows = cursor.rowcount   
      
   
-
     if cursor.rowcount > 0: 
          print ("Record Found")                                
     else :
