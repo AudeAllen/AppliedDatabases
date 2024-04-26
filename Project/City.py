@@ -89,19 +89,21 @@ def view_cities(n):
     results= cursor.fetchall() 
     print(results)  
 
-   # def get_first_element_using_map(tuples_list):
-   #     first_elements = list(map(lambda x: x[0], tuples_list))
-   #     return first_elements[0]   
-
-   # print(f"The first elements of the list are: {get_first_element_using_map(results)}")           
-
+   
     if cursor.rowcount > 0:  
         def get_first_element_using_map(tuples_list):
-            first_elements = list(map(lambda x: x[0], tuples_list))                           
-            return first_elements[0]                                    
-        print(f"The first elements of the list are: {get_first_element_using_map(results)}")           
-        print ("Record Found")  
-        next_two_rows(rownum, Country)                              
+            first_elements = list(map(lambda x: x[0], tuples_list))
+            Country =  first_elements[0]  
+            print(Country)
+            cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME like %s order by ci.name limit %s, 3",("%{}%".format(Country),rownum)) 
+            results= cursor.fetchall() 
+            print(results) 
+            next_two_rows(rownum, Country)
+            print(f"The first elements of the list are: {get_first_element_using_map(results)}")             
+            print  (first_elements[0])                            
+            return first_elements[0]                                  
+                      
+        next_two_rows(rownum, Country)                                      
     else :
          print("Your country search has returned more than one country or your country does not exist please choose again but be more specific!!!:")  
          view_cities(n)
@@ -115,8 +117,7 @@ def view_cities(n):
 
 def next_two_rows(rownum,Country):
   
-    print (rownum)
-    
+      
     rownum = rownum + 2
   
     cursor = db.cursor()
@@ -125,9 +126,7 @@ def next_two_rows(rownum,Country):
     print ("If you press q you will return to main menu, any other key will return next two cities of the country you entered")
 
     while True: 
-        print("In next two rows")
-        print (rownum)
-        print (Country)
+      
         rownum = rownum + 2
                    
         Choice = input("Choice:")
@@ -181,6 +180,7 @@ def update_population(m):
                 break  
         
     while True:
+      try:    
         Amount = float(input(" Please enter Amount:"))
         if not isinstance(Amount, float):
                 print("Must be an integer value")
@@ -191,7 +191,9 @@ def update_population(m):
             IncreasePop = decrease_population(cityid,Amount) 
             break          
         else: 
-            break    
+            break
+      except  ValueError as err: 
+           print (f"Error: {err}")   
                    
          
     db.close()
@@ -331,11 +333,9 @@ def add_newperson():
     cursor.execute("select PersonID from person where PersonID =%s",(userid,))
             
     results= cursor.fetchall() 
-    print(results)  
-
+     
     NumRows = cursor.rowcount   
-    print (NumRows)   
-        
+    
 
     if cursor.rowcount > 0: 
             print (f"This user id {userid} already exists you will be returned to Main Menu")
@@ -348,10 +348,9 @@ def add_newperson():
     cursor.execute("select ID from city where id =%s",(personcityid,))
             
     results= cursor.fetchall() 
-    print(results)  
-
+   
     NumRows = cursor.rowcount   
-    print (NumRows)   
+  
         
 
     if cursor.rowcount > 0: 
@@ -360,7 +359,7 @@ def add_newperson():
         print (f"This city id {personcityid} does not exist you will be returned to Main Menu")
         main() 
               
-
+    sql_Connector()
 
     cursor = db.cursor()
 
