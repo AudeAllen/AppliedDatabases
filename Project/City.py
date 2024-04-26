@@ -5,9 +5,6 @@ import mysql.connector
 global IncreaseorDecrease
 
 def main():  
- 
-
-    print ("In Main") 
 
     global countryStr 
     global rownum 
@@ -76,14 +73,10 @@ def display_menu():
 def view_cities(n):  
       
     sql_Connector()
-    
-    print ("In view_cities") 
-
+   
     global Country 
         
     Country = input(n) 
-   
-    print(Country)
    
 
     cursor = db.cursor()
@@ -106,9 +99,7 @@ def view_cities(n):
     db.close()
     cursor.close()
     
-         
-
-## End of Section    
+      
 
 def next_two_rows(rownum,Country):
   
@@ -155,13 +146,13 @@ def update_population(m):
 
     cursor = db.cursor()
 
-    cursor.execute("select ID, name, countrycode, population, longitude, latitude from citycopy where id =%s",(cityid,))
+    cursor.execute("select ID, name, countrycode, population, longitude, latitude from city where id =%s",(cityid,))
     
     results= cursor.fetchall() 
     print(results)  
 
     NumRows = cursor.rowcount   
-    print (NumRows)   
+     
   
 
     if cursor.rowcount > 0: 
@@ -171,8 +162,8 @@ def update_population(m):
          update_population(m)
     
     while True:
-        IncreaseorDecrease = input("Enter I if you want to increase population, D for decrease : ")
-        if IncreaseorDecrease not in ('I', 'D'):
+        IncreaseorDecrease = input("Enter I or i if you want to increase population, D or d for decrease : ")
+        if IncreaseorDecrease not in ('I', 'D','i','d'):
                 print("Not an appropriate choice. Please choose again")
         else:
                 break  
@@ -181,10 +172,10 @@ def update_population(m):
         Amount = float(input(" Please enter Amount:"))
         if not isinstance(Amount, float):
                 print("Must be an integer value")
-        elif (IncreaseorDecrease == "I"):
+        elif (IncreaseorDecrease == "I" or IncreaseorDecrease == "i"):
             IncreasePop = increase_population(cityid,Amount) 
             break   
-        elif (IncreaseorDecrease == "D"):
+        elif (IncreaseorDecrease == "D" or IncreaseorDecrease == "d"):
             IncreasePop = decrease_population(cityid,Amount) 
             break          
         else: 
@@ -195,9 +186,6 @@ def update_population(m):
     cursor.close()
 
 def increase_population(cityid,Amount):
-
-    print ("In increase population")
-
     import mysql.connector
       
     db = mysql.connector.connect(
@@ -210,19 +198,28 @@ def increase_population(cityid,Amount):
 
     cursor = db.cursor()
 
-    print (cityid)
-    print(Amount)
-
+   
+    cursor.execute("UPDATE city SET population = population + %s where id =%s",(Amount,cityid,))
     
-    cursor.execute("UPDATE citycopy SET population = population + %s where id =%s",(Amount,cityid,))
-    
-
     Rownumber =cursor.rowcount 
-    print(Rownumber)
+    
     results= cursor.fetchall() 
-    print(results)  
+  
 
-    print('Just about to close out')
+    cursor.execute("select name, population from city where id =%s",(cityid,))
+
+    results= cursor.fetchall() 
+   
+
+    # print the results in each row
+    for r in results: 
+             
+        cityname = (r[0])  
+        citypop = (r[1])      
+     
+    
+    print(f"You have increased the population of city {cityname}  by  {Amount}! The new population of {cityname} is {citypop} ")
+    
     db.close()
     cursor.close()
 
@@ -230,7 +227,7 @@ def increase_population(cityid,Amount):
 
 def decrease_population(cityid,Amount):
 
-    print ("In decrease population")
+   
 
     import mysql.connector
       
@@ -243,23 +240,30 @@ def decrease_population(cityid,Amount):
     )
 
     cursor = db.cursor()
-
-    print (cityid)
-    print(Amount)
-
+      
+    cursor.execute("UPDATE city SET population = population - %s where id =%s",(Amount,cityid,))
     
-    cursor.execute("UPDATE citycopy SET population = population - %s where id =%s",(Amount,cityid,))
-    
-
     Rownumber =cursor.rowcount 
-    print(Rownumber)
+    
     results= cursor.fetchall() 
-    print(results)  
+     
 
-    print('Just about to close out')
+    cursor.execute("select name, population from city where id =%s",(cityid,))
+
+    results= cursor.fetchall() 
+    
+
+    # print the results in each row
+    for r in results:                   
+        cityname = (r[0])  
+        citypop = (r[1])      
+     
+    
+    print(f"You have decreased the population of city {cityname}  by  {Amount}! The new population of {cityname} is {citypop} ")
+    
     db.close()
     cursor.close()
-   
+
     main()
 
 def add_newperson():  
@@ -329,7 +333,7 @@ def add_newperson():
 
     cursor = db.cursor()
 
-    cursor.execute("select ID from citycopy where id =%s",(personcityid,))
+    cursor.execute("select ID from city where id =%s",(personcityid,))
             
     results= cursor.fetchall() 
     print(results)  
@@ -493,7 +497,7 @@ def twin_with_dublin():
 
     cursor = db.cursor()
     
-    cursor.execute("select ID, name from citycopy where id =%s",(neo4jcityid,))
+    cursor.execute("select ID, name from city where id =%s",(neo4jcityid,))
              
     results= cursor.fetchall() 
     print(results) 
@@ -606,7 +610,7 @@ def create_twinonly_with_dublin(tx,cityname,neo4jcityid):
                 print ("In bit I want ")
                 with driver.session() as session:
                     try:    
-                        session.write_transaction(test, cityname, neo4jcityid)
+                        session.write_transaction(twin_with_dublin_as_exists, cityname, neo4jcityid)
                         main()    
                     except exceptions.ClientError as e:               
                         print ("Error Parameters are not valid")
@@ -618,7 +622,7 @@ def create_twinonly_with_dublin(tx,cityname,neo4jcityid):
 
             print("Just leaving the section2")
     
-def test(tx,cityname, neo4jcityid):
+def twin_with_dublin_as_exists(tx,cityname, neo4jcityid):
        from neo4j import exceptions
 
        print ("in test") 
