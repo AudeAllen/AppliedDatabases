@@ -294,37 +294,39 @@ def add_newperson():
          try:
               userid = int(input("Please Enter a UserID: ")) 
               break              
-         except ValueError:
-              print("Invalid input. Please enter a valid integer.")
+         except ValueError as err:
+                print (f"Error: {err}") 
+
 
     while True:
          try:
-              firstlastname = input("Please Enter your First and Last Name: ") 
-              int(firstlastname)               
-              print("Invalid input. Please enter a string value.")                                         
-         except ValueError:
-              break
+              firstlastname = input("Please Enter your First and Last Name: ")               
+              break                                         
+         except ValueError as err:
+                print (f"Error: {err}") 
+   
          
     while True:
-         try:
+        try:
               Age = int(input("Please Enter the Persons Age: ")) 
               break              
-         except ValueError:
-              print("Invalid input. Please enter a valid integer.")
+        except ValueError as err:
+                    print (f"Error: {err}") 
+              
      
     while True:
          try:
               salary = float(input("Please Enter the Persons Salary: ")) 
               break              
-         except ValueError:
-              print("Invalid input. Please enter a valid integer.")     
+         except ValueError as err:
+                print (f"Error: {err}")      
 
     while True:
          try:
               personcityid = int(input("Please Enter the CityID: ")) 
               break              
-         except ValueError:
-              print("Invalid input. Please enter a valid integer.")                           
+         except ValueError as err:
+                print (f"Error: {err}")                           
 
     print(f"You have chosen the following to add to the database, userid = {userid}  Fullname = {firstlastname}  Age ={Age} Salary = {salary} CityID = {personcityid}!")
 
