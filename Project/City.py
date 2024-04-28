@@ -17,8 +17,7 @@ def main():
 
     display_menu() 
     while True: 
-        print("In main Code")
-                   
+                        
         Choice = input("Choice:")
 
         if (Choice == "X"):
@@ -53,8 +52,7 @@ def main():
             
 
 
-def display_menu():
-    print ("In Display Menu") 
+def display_menu():     
     print("")
     print("======================================================")
     print("                           Menu                       ") 
@@ -82,8 +80,6 @@ def view_cities(n):
 
     cursor = db.cursor()
     
-   
-    #cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 3",(Country ,rownum))
     cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME like %s order by ci.name limit %s, 3",("%{}%".format(Country),rownum))
   
     results= cursor.fetchall() 
@@ -135,8 +131,8 @@ def next_two_rows(rownum,Country):
 
         if (Choice == "q"):
             break
-        elif (Choice != "q"):           
-           # cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME =%s order by ci.name limit %s, 2",(Country,rownum))
+        elif (Choice != "q"):          
+           
             cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME like %s order by ci.name limit %s, 2",("%{}%".format(Country),rownum))
             results= cursor.fetchall() 
             print(results) 
@@ -396,7 +392,7 @@ def delete_person():
      cursor.execute("select * from person where personid =%s",(userid,))
                 
      results= cursor.fetchall() 
-     print(results)  
+   
 
   
      if cursor.rowcount > 0: 
@@ -408,8 +404,7 @@ def delete_person():
 
      cursor.execute("select * from person person inner join hasvisitedcity hasvisitedcity on person.personid = hasvisitedcity.personid where  hasvisitedcity.personid =%s",(userid,))
      
-     results= cursor.fetchall() 
-     print(results)
+     results= cursor.fetchall()     
      if cursor.rowcount > 0: 
             print (f"This user id {userid} exists but has visited a city so cannot be deleted")
             main()                                                  
@@ -419,9 +414,9 @@ def delete_person():
         cursor = db.cursor()
 
         cursor.execute("delete from person where personid =%s",(userid,))
-                
-        results= cursor.fetchall() 
-        print(results)  
+                       
+        results= cursor.fetchall()     
+        print (f"You have deleted userid {userid} from the database!!!!")     
 
         main()
 
@@ -452,7 +447,7 @@ def show_population():
 
 
     if populationsymbol == '>':
-        print ("going to execute sql statement")
+        print (f"The countries with a population {populationsymbol} {populationamount} are ") 
         cursor.execute("select code,name, continent, population from country where population > %s",(populationamount,))
         results= cursor.fetchall() 
         print(results)    
@@ -471,7 +466,7 @@ def show_population():
     if cursor.rowcount > 0: 
             print (f"The countries with a population {populationsymbol} {populationamount} are ")                                                              
     else :
-        print("There are no countries with a population {populationsymbol} {populationamount} !!") 
+           print(f"There are no countries with a population {populationsymbol} {populationamount} !!") 
        
 def show_twinned_cities():
     
@@ -520,7 +515,7 @@ def twin_with_dublin():
         print(r[0])
         print(r[1])
         cityname = (r[1])
-        print(cityname)
+        
         
     NumRows = cursor.rowcount   
     print (NumRows)  
@@ -543,9 +538,23 @@ def twin_with_dublin():
 
 
 def display_does_city_exist(tx,cityname):
-        from neo4j import exceptions
-        print("In display_does_city_exist read section")
-               
+        from neo4j import exceptions   
+
+        results =  tx.run("MATCH (u:City {name: 'Dublin'}) "
+            "WITH COUNT(u) > 0  as dublin_exists "        
+            "RETURN dublin_exists")
+        for result in results:                       
+            print  (result['dublin_exists']) 
+
+        while True:
+            if (result['dublin_exists']) == True:
+                print('Dublin exists in the Neo4j database so it can be twinned') 
+                break
+            elif (result['dublin_exists']) == False:
+                print("Dublin has been deleted you will be redireced to Main Menu!!") 
+                main() 
+            else:
+                 break                    
        
         results =  tx.run("MATCH (u:City {name: $cityname}) "
            "WITH COUNT(u) > 0  as node_exists "        
@@ -553,8 +562,7 @@ def display_does_city_exist(tx,cityname):
             cityname=cityname)
         for result in results:                       
          print  (result['node_exists']) 
- 
-        print("error message")     
+    
 
         while True:
             if (result['node_exists']) == True:
@@ -585,7 +593,7 @@ def create_cityandtwin_with_dublin(tx,cityname,neo4jcityid):
    
     from neo4j import exceptions
        
-    print("In create_twin_with_dublin section")
+ 
 
    
     tx.run("MATCH(u:City {name:'Dublin'}) "
@@ -597,30 +605,20 @@ def create_cityandtwin_with_dublin(tx,cityname,neo4jcityid):
 
 def create_twinonly_with_dublin(tx,cityname,neo4jcityid):  
 
-        from neo4j import exceptions
-        print("In create_twinonly_with_dublin")
-        print(cityname)
-
-   
+        from neo4j import exceptions        
+        
         results =  tx.run("OPTIONAL MATCH (c:City{name:'Dublin'})<-[r]->(n:City{name: $cityname}) "                  
             "RETURN c, r IS NOT NULL as isTwinned",
                 cityname=cityname)        
-        for result in results: 
-             print("Just printing istwinned")                          
+        for result in results:                                       
              print  (result['isTwinned']) 
    
-        print("Just leaving the section")
-
-        print(cityname)
-        print(neo4jcityid)
-           
+                  
        # while True:
-        if (result['isTwinned']) == True:
-                            print ("In bit I dont want ")
+        if (result['isTwinned']) == True:                            
                             print("This city already twinned with Dublin so you will return to Main Menu")
                             main()
-        elif (result['isTwinned']) == False:
-                print ("In bit I want ")
+        elif (result['isTwinned']) == False:                
                 with driver.session() as session:
                     try:    
                         session.write_transaction(twin_with_dublin_as_exists, cityname, neo4jcityid)
@@ -629,16 +627,15 @@ def create_twinonly_with_dublin(tx,cityname,neo4jcityid):
                         print ("Error Parameters are not valid")
                          
                                         
-        else:
-            print("Going back to Main Menu")
+        else:            
             main()            
 
-            print("Just leaving the section2")
+         
     
 def twin_with_dublin_as_exists(tx,cityname, neo4jcityid):
        from neo4j import exceptions
 
-       print ("in test") 
+ 
 
        results = tx.run("MATCH(u:City {name:'Dublin'})"
                         "MATCH(c:City {name:$cityname, cid:$neo4jcityid}) "                   
@@ -646,8 +643,7 @@ def twin_with_dublin_as_exists(tx,cityname, neo4jcityid):
                         cityname=cityname, neo4jcityid=neo4jcityid) 
        
        print (f"Dublin is now twinned with {cityname}") 
-       for result in results: 
-                        print("Just in results")                          
+       for result in results:                                                 
                         print  (result['w'])    
 
                                 
