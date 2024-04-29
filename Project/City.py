@@ -1,6 +1,7 @@
 ## Python Project
 ## Author: Audrey Allen
 import mysql.connector
+import mysql.connector.errorcode
 
 global IncreaseorDecrease
 
@@ -315,7 +316,10 @@ def add_newperson():
               salary = float(input("Please Enter the Persons Salary: ")) 
               break              
          except ValueError as err:
-                print (f"Error: {err}")      
+                print (f"Error: {err}") 
+         except mysql.connector.Error as err:
+            print("Something went wrong: {}".format(err))  
+                   
 
     while True:
          try:
@@ -360,17 +364,19 @@ def add_newperson():
     sql_Connector()
 
     cursor = db.cursor()
-
-    cursor.execute("Insert into person (personid, personname, age, salary, city)VALUES (%s,%s, %s, %s,%s)",(userid,firstlastname,Age,salary,personcityid,))
-
-    Rownumber =cursor.rowcount 
-    print(Rownumber)
-    results= cursor.fetchall() 
-    print(results) 
+    
+    try:
+        cursor.execute("Insert into person (personid, personname, age, salary, city)VALUES (%s,%s, %s, %s,%s)",(userid,firstlastname,Age,salary,personcityid,))
+     
+    except  mysql.connector.Error as err:
+            print("Something went wrong: {}".format(err))  
 
 
     db.close()
     cursor.close()
+    
+    main()               
+
 
 def delete_person():
      
@@ -390,18 +396,17 @@ def delete_person():
      cursor = db.cursor()
 
      cursor.execute("select * from person where personid =%s",(userid,))
-                
+              
      results= cursor.fetchall() 
-   
-
-  
+       
      if cursor.rowcount > 0: 
             print (f"This user id {userid} exists")                                                              
      else :
         print("User ID does not exist so cannot perform delete operation!!") 
         main()
+    
                   
-
+     cursor = db.cursor()
      cursor.execute("select * from person person inner join hasvisitedcity hasvisitedcity on person.personid = hasvisitedcity.personid where  hasvisitedcity.personid =%s",(userid,))
      
      results= cursor.fetchall()     
@@ -411,17 +416,21 @@ def delete_person():
      else :
         print("User ID can be deleted!!") 
         
-        cursor = db.cursor()
 
-        cursor.execute("delete from person where personid =%s",(userid,))
+ 
+     cursor = db.cursor()
+
+     cursor.execute("delete from person where personid =%s",(userid,))
                        
-        results= cursor.fetchall()     
-        print (f"You have deleted userid {userid} from the database!!!!")     
-
-        main()
-
+     results= cursor.fetchall()     
+     print (f"You have deleted userid {userid} from the database!!!!")     
+     
      db.close()
      cursor.close() 
+
+     main()
+
+    
 
 def show_population():
      
@@ -467,6 +476,11 @@ def show_population():
             print (f"The countries with a population {populationsymbol} {populationamount} are ")                                                              
     else :
            print(f"There are no countries with a population {populationsymbol} {populationamount} !!") 
+
+    db.close()
+    cursor.close()   
+
+    main()     
        
 def show_twinned_cities():
     
@@ -508,7 +522,7 @@ def twin_with_dublin():
     cursor.execute("select ID, name from city where id =%s",(neo4jcityid,))
              
     results= cursor.fetchall() 
-    print(results) 
+    
 
     # print the results in each row
     for r in results:        
@@ -518,7 +532,7 @@ def twin_with_dublin():
         
         
     NumRows = cursor.rowcount   
-    print (NumRows)  
+    
 
 
     if cursor.rowcount > 0: 
@@ -663,7 +677,7 @@ def neo4jconnection():
 
 def sql_Connector():
     import mysql.connector
-    print ("In sql_Connector") 
+    
 
     global db
     global host
