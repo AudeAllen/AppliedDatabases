@@ -69,6 +69,10 @@ def display_menu():
    
 ## View Cities Function
 def view_cities(n):  
+
+# This function returns country name, city name, district and city population of the country that is input
+# Can either enter full country name or a partial name
+# If a country name is entered that does not exist then an error message will appear to the user        
       
     sql_Connector()
    
@@ -98,15 +102,20 @@ def view_cities(n):
             next_two_rows(rownum, Country)
             print(f"The first elements of the list are: {get_first_element_using_map(results)}")             
             print  (first_elements[0])                            
-            return first_elements[0]                                  
-                      
+            return first_elements[0]   
+                                       
+    # the function next_two_rows is called here and if any key other than 'q' (returns to main menu)  the 
+    # next two cities from that country is shown      
+              
         next_two_rows(rownum, Country)                                      
     else :
-         print("Your country search has returned more than one country or your country does not exist please choose again but be more specific!!!:")  
+         print("Your country does not exist please choose again but be more specific!!!:")  
          view_cities(n)
      
     main()   
-       
+
+    # Close out the connection to the database
+   
     db.close()
     cursor.close()
     
@@ -114,6 +123,7 @@ def view_cities(n):
 
 def next_two_rows(rownum,Country):
   
+  # Add 2 onto the variable rownum as the next two rows must be shown 
       
     rownum = rownum + 2
   
@@ -131,7 +141,7 @@ def next_two_rows(rownum,Country):
 ## Change the m below to not equal to q before you put live
 
         if (Choice == "q"):
-            break
+            main()
         elif (Choice != "q"):          
            
             cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME like %s order by ci.name limit %s, 2",("%{}%".format(Country),rownum))
@@ -145,6 +155,8 @@ def update_population(m):
     global cityid 
             
     cityid = input(m) 
+   
+   # Connection to mysql database is made
 
     db = mysql.connector.connect(
         host="localhost",
@@ -154,6 +166,8 @@ def update_population(m):
     )
 
     cursor = db.cursor()
+    
+    # Extract ID, name, countrycode, population, long and lat from cityid that is entered by the user
 
     cursor.execute("select ID, name, countrycode, population, longitude, latitude from city where id =%s",(cityid,))
     
@@ -162,13 +176,17 @@ def update_population(m):
 
     NumRows = cursor.rowcount   
      
-  
+  # If the city does not exist go back and enter another city id 
+
     if cursor.rowcount > 0: 
          print ("Record Found")                                
     else :
-         print("This City does not Exist, Please go back to main menu and enter another:")  
+         print("This City does not Exist, Please go back and enter another city id please:")  
          update_population(m)
     
+
+    # User is asked whether or not they wish to increase or decrease the population of the city chosen
+
     while True:
         IncreaseorDecrease = input("Enter I or i if you want to increase population, D or d for decrease : ")
         if IncreaseorDecrease not in ('I', 'D','i','d'):
@@ -176,6 +194,10 @@ def update_population(m):
         else:
                 break  
         
+    # User is asked by how much they wish to increase or decrease the population of that city 
+    # Some error handling also in this piece of code
+    # Depending on   
+    
     while True:
       try:    
         Amount = float(input(" Please enter Amount:"))
@@ -185,7 +207,7 @@ def update_population(m):
             IncreasePop = increase_population(cityid,Amount) 
             break   
         elif (IncreaseorDecrease == "D" or IncreaseorDecrease == "d"):
-            IncreasePop = decrease_population(cityid,Amount) 
+            IncreasePop =   (cityid,Amount) 
             break          
         else: 
             break
@@ -222,13 +244,14 @@ def increase_population(cityid,Amount):
     results= cursor.fetchall() 
    
 
-    # print the results in each row
+    # print the results in each row - Get new population of the city after the increase
     for r in results: 
              
         cityname = (r[0])  
         citypop = (r[1])      
      
-    
+    # Print output message to show user what has been done - 
+
     print(f"You have increased the population of city {cityname}  by  {Amount}! The new population of {cityname} is {citypop} ")
     
     db.close()
@@ -237,8 +260,6 @@ def increase_population(cityid,Amount):
     main()
 
 def decrease_population(cityid,Amount):
-
-   
 
     import mysql.connector
       
@@ -264,14 +285,17 @@ def decrease_population(cityid,Amount):
     results= cursor.fetchall() 
     
 
-    # print the results in each row
+    # print the results in each row - Get new population of the city after the decrease
     for r in results:                   
         cityname = (r[0])  
         citypop = (r[1])      
      
-    
+     # Print output message to show user what has been done - 
+
     print(f"You have decreased the population of city {cityname}  by  {Amount}! The new population of {cityname} is {citypop} ")
     
+    # Close mysql connection
+
     db.close()
     cursor.close()
 
@@ -663,6 +687,8 @@ def twin_with_dublin_as_exists(tx,cityname, neo4jcityid):
                                 
      
 def neo4jconnection():
+ 
+ # Function that connects to the neo4j database
        
  from neo4j import GraphDatabase
  from neo4j import exceptions
@@ -676,6 +702,9 @@ def neo4jconnection():
 
 
 def sql_Connector():
+
+# Function that calls sql connector and connects to the mysql database with the credentials specified
+    
     import mysql.connector
     
 
