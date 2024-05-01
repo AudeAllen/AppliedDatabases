@@ -1,7 +1,15 @@
 ## Python Project
 ## Author: Audrey Allen
+## Course: Applied Databases
+## Lecturer: Gerard Harrison
+## Due Date: May 6th 2024
+
 import mysql.connector
 import mysql.connector.errorcode
+# The python package rich can change the font colour for the output
+from rich.console import Console
+console = Console()
+
 
 global IncreaseorDecrease
 
@@ -12,7 +20,8 @@ def main():
     global cityid 
 
     rownum = 0 
-    countryStr = "Enter Country:"     
+    countryStr = "Enter Country:" 
+      
     cityid = "Enter City ID:"
     
 
@@ -22,8 +31,10 @@ def main():
         Choice = input("Choice:")
 
         if (Choice == "X"):
-            exit()
+            console.print('[bright_green]Goodbye!!! You are now exiting the program!!! [/bright_green]', highlight=False) 
+            exit()            
         elif (Choice == "x"):
+            console.print('[bright_green]Goodbye!!! You are now exiting the program!!! [/bright_green]', highlight=False)
             exit()
         elif (Choice == "1"):
             rownum = 0 
@@ -56,16 +67,17 @@ def main():
 def display_menu():     
     print("")
     print("======================================================")
-    print("                           Menu                       ") 
-    print("======================================================")
-    print("1. View Cities by Country")
-    print("2. Update City Population") 
-    print("3. Add New Person") 
-    print("4. Delete Person")
-    print("5. View Countries by population")
-    print("6. Show Twinned Cities")
-    print("7. Twin with Dublin")
-    print("X. Exit Application")
+  #  print("                           Menu                       ") 
+    console.print('[green]                           Menu                       [/green]', highlight=False)
+    print("======================================================")  
+    console.print('[blue]1. View Cities by Country[/blue]', highlight=False)    
+    console.print('[chartreuse2]2. Update City Population[/chartreuse2]', highlight=False)    
+    console.print('[orchid]3. Add New Person[/orchid]', highlight=False)    
+    console.print('[gold1]4. Delete Person[/gold1]', highlight=False)    
+    console.print('[dark_olive_green2]5. View Countries by population[/dark_olive_green2]', highlight=False)    
+    console.print('[light_steel_blue]6. Show Twinned Cities[/light_steel_blue]', highlight=False)    
+    console.print('[dark_slate_gray1]7. Twin with Dublin[/dark_slate_gray1]', highlight=False)   
+    console.print('[bright_red]X. Exit Application[/bright_red]', highlight=False)
    
 ## View Cities Function
 def view_cities(n):  
@@ -80,23 +92,23 @@ def view_cities(n):
         
     Country = input(n) 
 
-    print (Country)
+    console.print('[blue]'+Country+'[/blue]', highlight=False) 
    
 
     cursor = db.cursor()
     
-    cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME like %s order by ci.name limit %s, 3",("%{}%".format(Country),rownum))
-  
-    results= cursor.fetchall() 
-    print(results)  
-
-   
+    cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME like %s order by ci.name limit %s, 3",("{}%".format(Country),rownum))
+    
+    # This returns the result from the mysql query   
+    results= cursor.fetchall()       
+    print(results) 
+    
     if cursor.rowcount > 0:  
         def get_first_element_using_map(tuples_list):
             first_elements = list(map(lambda x: x[0], tuples_list))
             Country =  first_elements[0]  
-            print(Country)
-            cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME like %s order by ci.name limit %s, 3",("%{}%".format(Country),rownum)) 
+           # print(Country)
+            cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME like %s order by ci.name limit %s, 3",("{}%".format(Country),rownum)) 
             results= cursor.fetchall() 
             print(results) 
             next_two_rows(rownum, Country)
@@ -138,15 +150,21 @@ def next_two_rows(rownum,Country):
                    
         Choice = input("Choice:")
       
-## Change the m below to not equal to q before you put live
+## If option is q user will be returned to main menu otherwise next two cities of that country will be shown to the user
 
         if (Choice == "q"):
             main()
         elif (Choice != "q"):          
            
-            cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME like %s order by ci.name limit %s, 2",("%{}%".format(Country),rownum))
+            cursor.execute("SELECT CO.NAME AS 'Country Name', ci.name as 'City Name', ci.district as 'City District', ci.population as 'City Population' FROM COUNTRY CO INNER JOIN CITY CI ON CO.CODE = CI.COUNTRYCODE  where CO.NAME like %s order by ci.name limit %s, 2",("{}%".format(Country),rownum))
             results= cursor.fetchall() 
             print(results) 
+
+        if cursor.rowcount == 0:   
+             main()
+        else:  
+           results= cursor.fetchall() 
+          # print(results)           
                    
 def update_population(m): 
     
@@ -302,8 +320,13 @@ def decrease_population(cityid,Amount):
     main()
 
 def add_newperson():  
+
+# This function adds a new person to the mysql database
+    
     import mysql.connector
     sql_Connector()
+
+# Declaring the variables as global variables
 
     global userid
     global firstlastname
@@ -362,6 +385,7 @@ def add_newperson():
      
     NumRows = cursor.rowcount   
     
+# Check does the userid already exist in the mysql database
 
     if cursor.rowcount > 0: 
             print (f"This user id {userid} already exists you will be returned to Main Menu")
@@ -376,8 +400,7 @@ def add_newperson():
     results= cursor.fetchall() 
    
     NumRows = cursor.rowcount   
-  
-        
+          
 
     if cursor.rowcount > 0: 
             print (f"This city id {personcityid}  exists")                                                     
@@ -389,12 +412,15 @@ def add_newperson():
 
     cursor = db.cursor()
     
+    # Insert the record into the mysql database
+
     try:
         cursor.execute("Insert into person (personid, personname, age, salary, city)VALUES (%s,%s, %s, %s,%s)",(userid,firstlastname,Age,salary,personcityid,))
      
     except  mysql.connector.Error as err:
             print("Something went wrong: {}".format(err))  
 
+    # Close the mysql connection
 
     db.close()
     cursor.close()
@@ -403,6 +429,8 @@ def add_newperson():
 
 
 def delete_person():
+
+# This function deletes the id of the person you enter from the mysql database
      
      import mysql.connector
      sql_Connector()    
@@ -429,6 +457,7 @@ def delete_person():
         print("User ID does not exist so cannot perform delete operation!!") 
         main()
     
+     # If person id in question has visited a city then they cannot be deletd from the mysql database
                   
      cursor = db.cursor()
      cursor.execute("select * from person person inner join hasvisitedcity hasvisitedcity on person.personid = hasvisitedcity.personid where  hasvisitedcity.personid =%s",(userid,))
@@ -478,17 +507,20 @@ def show_population():
     cursor = db.cursor()
   
 
+# Error handling to check that the user has entered a valid symbol - > OR < or = If not an error message will appear
 
     if populationsymbol == '>':
         print (f"The countries with a population {populationsymbol} {populationamount} are ") 
         cursor.execute("select code,name, continent, population from country where population > %s",(populationamount,))
         results= cursor.fetchall() 
         print(results)    
-    elif   populationsymbol == '<':  
+    elif   populationsymbol == '<': 
+         print (f"The countries with a population {populationsymbol} {populationamount} are ")  
          cursor.execute("select  code,name, continent, population from country where population < %s",(populationamount,))
          results= cursor.fetchall() 
          print(results)
-    elif  populationsymbol == '=':   
+    elif  populationsymbol == '=': 
+         print (f"The countries with a population {populationsymbol} {populationamount} are ")   
          cursor.execute("select  code,name, continent, population from country where population = %s",(populationamount,))
          results= cursor.fetchall() 
          print(results)
@@ -497,7 +529,7 @@ def show_population():
        
     
     if cursor.rowcount > 0: 
-            print (f"The countries with a population {populationsymbol} {populationamount} are ")                                                              
+            print (f"The countries with a population {populationsymbol} {populationamount} are above ")                                                              
     else :
            print(f"There are no countries with a population {populationsymbol} {populationamount} !!") 
 
